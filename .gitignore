@@ -1,0 +1,67 @@
+# Системные файлы macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Временные файлы
+*.tmp
+*.swp
+*.swo
+*~
+
+# Конфиденциальные данные
+.env
+.env.*
+!*.env.example
+secrets/
+*.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+*.secret
+*.token
+
+# Логи
+*.log
+logs/
+*.log.*
+
+# Файлы IDE
+.vscode/
+.idea/
+*.iml
+
+# Скомпилированные файлы
+*.o
+*.out
+*.exe
+*.so
+*.a
+
+# Артефакты сборки
+build/
+dist/
+bin/
+obj/
+
+# Исключаем большие файлы
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.iso
+
+# GitLab
+.gitlab-ci.yml.local
+.cache/
+
+# Резервные копии
+*.bak
+*.backup
+
+# Файлы виртуальных машин
+*.vdi
+*.vmdk
+*.nvram

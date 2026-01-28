@@ -1,0 +1,88 @@
+stages:
+  - test
+  - build
+  - integration_test
+  - deploy
+ 
+variables:
+   TELEGRAM_BOT_TOKEN: "8037630444:AAGYJqMit73lhDYO6j1HsORKJNk0lP-NMzA"
+   TELEGRAM_USER_ID: "234681525"
+
+test_codestyle:
+  stage: test
+  tags:
+    - shell
+  only:
+    - develop
+  script:
+    - echo "Проверка кодстайла с помощью clang-format..."
+    - cp materials/linters/.clang-format code-samples/
+    - |
+      cd code-samples
+      for file in $(find . -name '*.c' -o -name '*.h'); do
+        echo "Проверка $file..."
+        clang-format -n "$file"
+      done
+  after_script:
+    - cd code-samples
+    - chmod +x telegram_notify.sh
+    - ./telegram_notify.sh "Тестирование кодстайла" "$CI_JOB_STATUS"
+
+build_job:
+  stage: build
+  tags:
+    - shell
+  only:
+    - develop
+  script:
+    - echo "Сборка приложения..."
+    - cd code-samples
+    - make
+  artifacts:
+    paths:
+      - code-samples/
+    expire_in: 30 days
+  after_script:
+    - cd code-samples
+    - chmod +x telegram_notify.sh
+    - ./telegram_notify.sh "Сборка" "$CI_JOB_STATUS"
+
+integration_tests:
+  stage: integration_test
+  tags:
+    - shell
+  only:
+    - develop
+  script:
+    - echo "Запуск интеграционных тестов..."
+    - cd code-samples
+    - chmod +x integration_test.sh
+    - ./integration_test.sh
+  needs:
+    - test_codestyle
+    - build_job
+  after_script:
+    - cd code-samples
+    - chmod +x telegram_notify.sh
+    - ./telegram_notify.sh "Интеграционные тесты" "$CI_JOB_STATUS"
+
+deploy_to_production:
+  stage: deploy
+  tags:
+    - shell
+  only:
+    - develop
+  script:
+    - echo "Деплой приложения на продакшн сервер..."
+    - cd code-samples
+    - chmod +x deploy.sh
+    - ./deploy.sh
+  when: manual
+  needs:
+    - test_codestyle
+    - build_job
+    - integration_tests
+  after_script:
+    - cd code-samples
+    - chmod +x telegram_notify.sh
+    - ./telegram_notify.sh "Деплой" "$CI_JOB_STATUS"
